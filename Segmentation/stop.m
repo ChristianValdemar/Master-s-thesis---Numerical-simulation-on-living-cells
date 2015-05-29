@@ -1,4 +1,5 @@
 function F = stop(string)
+% Christian Valdemar Hansen, SDU 2012.
 
 % Messagebox:
 M = msgbox(string,'Stop iterating');

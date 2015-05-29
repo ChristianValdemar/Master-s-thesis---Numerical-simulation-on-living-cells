@@ -1,13 +1,10 @@
-function phi = chanvese(I,n,my,lambda1,lambda2,maxsize,show)
+function phi = chanvese(I,n,my,lambda1,lambda2,maxsize)
+% Christian Valdemar Hansen, SDU 2012.
 % Input
 % I is the Image 
 % n is the number of iterations
 % my, lambda1 and lambda2 are parameters for Chan-Vese
-% my is smoothness
-% lambda1 > lambda2 gives a more uniform object
-% lambda1 < lambda2 gives a more uniform background
 % maxsize is the max number of pixels on the long edge on the output image
-% Show is the number of iterations between each plot
 % Example:
 % I = imread('image.jpg');
 % chanvese(I,500,1,1,1,300)
@@ -27,9 +24,6 @@ end
 if(~exist('maxsize','var')) 
     maxsize=250; 
 end
-if(~exist('show','var')) 
-    show=5; 
-end
 
 % Things for the stop criteria
 S = stop({'Stop me on the ok button:'}) ;
@@ -46,11 +40,11 @@ temp = double(temp)./255;
 
 
 % Rescaling the size of the image
-s = maxsize/min(size(temp));
+scale = maxsize/min(size(temp));
    
-if s<=1   % If the image is bigger than "maxsize" pixel on the shortest edge then rescale
-    temp = imresize(temp,s);
-    I = imresize(I,s);
+if scale<=1   % If the image is bigger than "maxsize" pixel on the shortest edge then rescale
+    temp = imresize(temp,scale);
+    I = imresize(I,scale);
 end
 
 
@@ -80,9 +74,8 @@ figure,
 % Iterativ method 
 dt = 1;
 
-% Main loop for the Chan-Vese method
+%Chan-Vese method
 for i=1:n
-    old = phi;
     %Finding c- and c+
     heavi = heaviside1(phi);
     cp = sum(sum(heavi.*temp))/length(find(phi>=0)); %inside mean gray level
@@ -91,12 +84,11 @@ for i=1:n
     kappa = curvature(phi);
 
     % Iterative step
-    force = diracdelta(phi).*(my*kappa - lambda1*(temp-cp).^2 + lambda2*(temp-cm).^2);
-    phi = phi + dt.*(force./(max(max(abs(force)))));
-
+    phi_t = diracdelta(phi).*(my*kappa - lambda1*(temp-cp).^2 + lambda2*(temp-cm).^2);
+    phi = phi + dt.*(phi_t./(max(max(abs(phi_t))))); 
 
     % Print contour
-    if(mod(i-1,show) == 0)
+    if(mod(i-1,10) == 0)
         imshow(temp); hold on;
         contour(phi, [0 0], 'r', 'LineWidth',2); drawnow; hold off;
         xlabel('The iteration can be stopped by pressing the OK button in the other window')
@@ -136,5 +128,4 @@ d(1:2,:) = 0;
 d(:,1:2) = 0;
 d(size(d,1)-2:size(d,1),:) = 0;
 d(:,size(d-2,2):size(d,2)) = 0;
-
 end

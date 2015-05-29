@@ -1,4 +1,5 @@
 function K = curvature(I)
+% Christian Valdemar Hansen, SDU 2012.
 
 [m,n]=size(I);
 
@@ -32,7 +33,6 @@ temp = [xyl (I(2:m-1,2:n-1)-I(1:m-2,3:n)-I(3:m,1:n-2)-I(1:m-2,1:n-2))/4 xyr];
 phixy = [xyu ; temp ; xyb];
 
 K = (phixx.*phiy.^2-2*phix.*(phiy.*phixy)+phiyy.*phix.^2)./(phix.^2+phiy.^2+eps).^(3/2);
-
-K = K./max(max(abs(K)));
+K = K./max(max(abs(K))); % Normalize
 
 end
